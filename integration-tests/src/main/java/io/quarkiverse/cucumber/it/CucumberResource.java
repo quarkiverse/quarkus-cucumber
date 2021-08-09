@@ -23,7 +23,6 @@ import javax.ws.rs.Path;
 @Path("/cucumber")
 @ApplicationScoped
 public class CucumberResource {
-    // add some rest methods here
 
     @GET
     public String hello() {

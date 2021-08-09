@@ -1,7 +1,7 @@
 = Quarkus - Cucumber
-:extension-status: preview
+:extension-status: experimental
 
-Describe what the extension does here.
+This extension allows you to use https://cucumber.io/[Cucumber] to test your Quarkus application.
 
 == Installation
 
@@ -16,7 +16,18 @@ In your `pom.xml` file, add:
 </dependency>
 ----
 
-[[extension-configuration-reference]]
-== Extension Configuration Reference
+== Usage
 
-include::config.adoc[leveloffset=+1, opts=optional]
+To bootstrap Cucumber add the following class to your test suite:
+
+[source,java]
+----
+import io.quarkiverse.cucumber.CucumberQuarkusTest;
+
+public class MyTest extends CucumberQuarkusTest {
+
+}
+
+----
+
+This will automatically bootstrap Cucumber, and discover any `.feature` files and step classes that provide glue code.

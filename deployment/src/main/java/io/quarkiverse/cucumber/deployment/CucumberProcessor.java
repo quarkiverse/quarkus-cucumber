@@ -8,6 +8,7 @@ import org.jboss.jandex.DotName;
 
 import io.cucumber.java.StepDefinitionAnnotation;
 import io.cucumber.java.StepDefinitionAnnotations;
+import io.quarkiverse.cucumber.CucumberQuarkusTest;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.processor.DotNames;
 import io.quarkus.deployment.annotations.BuildStep;
@@ -47,6 +48,10 @@ class CucumberProcessor {
                     stepClasses.add(stepAnn.target().asMethod().declaringClass().name().toString());
                 }
             }
+        }
+        for (var i : indexBuildItem.getIndex()
+                .getAllKnownSubclasses(DotName.createSimple(CucumberQuarkusTest.class.getName()))) {
+            stepClasses.add(i.name().toString());
         }
         return AdditionalBeanBuildItem.builder().addBeanClasses(stepClasses).setDefaultScope(DotNames.SINGLETON)
                 .setUnremovable().build();

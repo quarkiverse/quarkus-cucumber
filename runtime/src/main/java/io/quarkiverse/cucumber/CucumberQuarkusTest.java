@@ -39,7 +39,9 @@ import io.cucumber.plugin.event.EventHandler;
 import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.Status;
 import io.cucumber.plugin.event.TestStepFinished;
+import io.quarkus.test.junit.QuarkusTest;
 
+@QuarkusTest
 public abstract class CucumberQuarkusTest {
 
     @TestFactory

@@ -22,6 +22,10 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-junit5</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -36,6 +40,8 @@
               <goal>extension-descriptor</goal>
             </goals>
             <configuration>
+              <!-- quarkus-junit5 is a bit different, a project that includes it can't use validation-->
+              <skipExtensionValidation>true</skipExtensionValidation>
               <deployment>${project.groupId}:${project.artifactId}-deployment:${project.version}</deployment>
             </configuration>
           </execution>
