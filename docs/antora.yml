@@ -1,0 +1,5 @@
+name: quarkus-cucumber
+title: Quarkus - Cucumber
+version: dev
+nav:
+  - modules/ROOT/nav.adoc
