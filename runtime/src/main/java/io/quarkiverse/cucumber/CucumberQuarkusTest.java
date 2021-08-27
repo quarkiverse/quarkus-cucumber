@@ -1,13 +1,20 @@
 package io.quarkiverse.cucumber;
 
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DynamicContainer;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
 import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.core.eventbus.EventBus;
@@ -35,11 +42,6 @@ import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.Status;
 import io.cucumber.plugin.event.TestStepFinished;
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
 
 @QuarkusTest
 public abstract class CucumberQuarkusTest {

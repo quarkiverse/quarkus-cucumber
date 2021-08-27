@@ -5,10 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apiguardian.api.API;
+
 import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.core.snippets.SnippetType;
 import io.cucumber.plugin.Plugin;
-import org.apiguardian.api.API;
 
 /**
  * Configures Cucumbers options via class type annotation.
