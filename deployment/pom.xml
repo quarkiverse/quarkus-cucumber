@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.quarkiverse.cucumber</groupId>
     <artifactId>quarkus-cucumber-parent</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>quarkus-cucumber-deployment</artifactId>
   <name>Quarkus - Cucumber - Deployment</name>
