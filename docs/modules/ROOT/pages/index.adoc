@@ -31,3 +31,25 @@ public class MyTest extends CucumberQuarkusTest {
 ----
 
 This will automatically bootstrap Cucumber, and discover any `.feature` files and step classes that provide glue code.
+
+== IDE Integration
+
+The test class can by run by any IDE with support for JUnit5.
+
+In IntelliJ it is possible to directly run feature files:
+
+image::run-cucumber-inside-intellij.gif[]
+
+You need to add the following `main` method to your test class:
+
+[source,java]
+----
+import io.quarkiverse.cucumber.CucumberQuarkusTest;
+
+public class MyTest extends CucumberQuarkusTest {
+    public static void main(String[] args) {
+        runMain(MyTest.class, args);
+    }
+}
+
+----

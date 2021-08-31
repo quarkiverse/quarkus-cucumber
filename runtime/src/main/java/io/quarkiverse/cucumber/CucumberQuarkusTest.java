@@ -1,11 +1,15 @@
 package io.quarkiverse.cucumber;
 
+import java.net.URI;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
@@ -15,15 +19,19 @@ import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.platform.console.ConsoleLauncher;
 
 import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.feature.FeatureParser;
+import io.cucumber.core.options.CommandlineOptionsParser;
+import io.cucumber.core.options.Constants;
 import io.cucumber.core.options.CucumberOptionsAnnotationParser;
 import io.cucumber.core.options.CucumberProperties;
 import io.cucumber.core.options.CucumberPropertiesParser;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.options.RuntimeOptionsBuilder;
+import io.cucumber.core.plugin.Options;
 import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.plugin.PrettyFormatter;
@@ -180,5 +188,51 @@ public abstract class CucumberQuarkusTest {
                 Thread.currentThread().setContextClassLoader(old);
             }
         }
+    }
+
+    protected static <T extends CucumberQuarkusTest> void runMain(Class<T> testClass, String[] args) {
+        RuntimeOptions propertiesFileOptions = new CucumberPropertiesParser()
+                .parse(CucumberProperties.fromPropertiesFile())
+                .build();
+
+        RuntimeOptions environmentOptions = new CucumberPropertiesParser()
+                .parse(CucumberProperties.fromEnvironment())
+                .build(propertiesFileOptions);
+
+        RuntimeOptions systemOptions = new CucumberPropertiesParser()
+                .parse(CucumberProperties.fromSystemProperties())
+                .build(environmentOptions);
+
+        CommandlineOptionsParser commandlineOptionsParser = new CommandlineOptionsParser(System.out);
+        RuntimeOptions runtimeOptions = commandlineOptionsParser.parse(args).build(systemOptions);
+
+        commandlineOptionsParser.exitStatus().ifPresent(System::exit);
+
+        System.setProperty(Constants.ANSI_COLORS_DISABLED_PROPERTY_NAME, String.valueOf(runtimeOptions.isMonochrome()));
+        //TODO: CUCUMBER_PROPERTIES_FILE_NAME
+        System.setProperty(Constants.EXECUTION_DRY_RUN_PROPERTY_NAME, String.valueOf(runtimeOptions.isDryRun()));
+        System.setProperty(Constants.EXECUTION_LIMIT_PROPERTY_NAME, String.valueOf(runtimeOptions.getLimitCount()));
+        //TODO: EXECUTION_ORDER_PROPERTY_NAME runtimeOptions.getPickleOrder(); (how can we convert this?)
+        //--strict/--no-strict is already handled by the CommandlineOptionsParser EXECUTION_STRICT_PROPERTY_NAME
+        System.setProperty(Constants.WIP_PROPERTY_NAME, String.valueOf(runtimeOptions.isWip()));
+        System.setProperty(Constants.FEATURES_PROPERTY_NAME,
+                runtimeOptions.getFeaturePaths().stream().map(URI::toString).collect(Collectors.joining(",")));
+        System.setProperty(Constants.FILTER_NAME_PROPERTY_NAME,
+                runtimeOptions.getNameFilters().stream().map(Pattern::toString).collect(Collectors.joining(",")));
+        System.setProperty(Constants.FILTER_TAGS_PROPERTY_NAME,
+                runtimeOptions.getTagExpressions().stream().map(Object::toString).collect(Collectors.joining(",")));
+        System.setProperty(Constants.GLUE_PROPERTY_NAME,
+                runtimeOptions.getGlue().stream().map(URI::toString).collect(Collectors.joining(",")));
+        Optional.ofNullable(runtimeOptions.getObjectFactoryClass())
+                .ifPresent(s -> System.setProperty(Constants.OBJECT_FACTORY_PROPERTY_NAME, s.getName()));
+        System.setProperty(Constants.PLUGIN_PROPERTY_NAME,
+                runtimeOptions.plugins().stream().map(Options.Plugin::pluginString).collect(Collectors.joining(",")));
+        //Not supported via CLI argument: PLUGIN_PUBLISH_ENABLED_PROPERTY_NAME
+        //Not supported via CLI argument: PLUGIN_PUBLISH_TOKEN_PROPERTY_NAME
+        //Not supported via CLI argument: PLUGIN_PUBLISH_URL_PROPERTY_NAME
+        //Not supported via CLI argument: PLUGIN_PUBLISH_QUIET_PROPERTY_NAME
+        System.setProperty(Constants.SNIPPET_TYPE_PROPERTY_NAME, runtimeOptions.getSnippetType().toString().toLowerCase());
+
+        ConsoleLauncher.main("-c", testClass.getName());
     }
 }
