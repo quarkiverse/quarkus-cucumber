@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,8 @@ import org.junit.platform.console.ConsoleLauncher;
 import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.feature.FeatureParser;
+import io.cucumber.core.filter.Filters;
+import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.options.CommandlineOptionsParser;
 import io.cucumber.core.options.Constants;
 import io.cucumber.core.options.CucumberOptionsAnnotationParser;
@@ -126,31 +129,40 @@ public abstract class CucumberQuarkusTest {
         List<DynamicNode> features = new LinkedList<>();
         features.add(DynamicTest.dynamicTest("Start Cucumber", context::startTestRun));
 
+        Predicate<Pickle> filters = new Filters(runtimeOptions);
+
         featureSupplier.get().forEach(f -> {
             List<DynamicTest> tests = new LinkedList<>();
             tests.add(DynamicTest.dynamicTest("Start Feature", () -> context.beforeFeature(f)));
-            f.getPickles().forEach(p -> tests.add(DynamicTest.dynamicTest(p.getName(), () -> {
-                AtomicReference<TestStepFinished> resultAtomicReference = new AtomicReference<>();
-                EventHandler<TestStepFinished> handler = event -> {
-                    if (event.getResult().getStatus() != Status.PASSED) {
-                        // save the first failed test step, so that we can get the line number of the cucumber file
-                        resultAtomicReference.compareAndSet(null, event);
-                    }
-                };
-                eventBus.registerHandlerFor(TestStepFinished.class, handler);
-                context.runTestCase(r -> r.runPickle(p));
-                eventBus.removeHandlerFor(TestStepFinished.class, handler);
+            f.getPickles()
+                    .stream()
+                    .filter(filters)
+                    .forEach(p -> tests.add(DynamicTest.dynamicTest(p.getName(), () -> {
+                        AtomicReference<TestStepFinished> resultAtomicReference = new AtomicReference<>();
+                        EventHandler<TestStepFinished> handler = event -> {
+                            if (event.getResult().getStatus() != Status.PASSED) {
+                                // save the first failed test step, so that we can get the line number of the cucumber file
+                                resultAtomicReference.compareAndSet(null, event);
+                            }
+                        };
+                        eventBus.registerHandlerFor(TestStepFinished.class, handler);
+                        context.runTestCase(r -> r.runPickle(p));
+                        eventBus.removeHandlerFor(TestStepFinished.class, handler);
 
-                // if we have no main arguments, we are running as part of a junit test suite, we need to fail the junit test explicitly
-                if (resultAtomicReference.get() != null) {
-                    Assertions.fail(
-                            "failed in " + f.getUri() + " at line "
-                                    + ((PickleStepTestStep) resultAtomicReference.get().getTestStep()).getStep().getLocation()
-                                            .getLine(),
-                            resultAtomicReference.get().getResult().getError());
-                }
-            })));
-            features.add(DynamicContainer.dynamicContainer(f.getName().orElse(f.getSource()), tests.stream()));
+                        // if we have no main arguments, we are running as part of a junit test suite, we need to fail the junit test explicitly
+                        if (resultAtomicReference.get() != null) {
+                            Assertions.fail(
+                                    "failed in " + f.getUri() + " at line "
+                                            + ((PickleStepTestStep) resultAtomicReference.get().getTestStep()).getStep()
+                                                    .getLocation()
+                                                    .getLine(),
+                                    resultAtomicReference.get().getResult().getError());
+                        }
+                    })));
+
+            if (tests.size() > 1) {
+                features.add(DynamicContainer.dynamicContainer(f.getName().orElse(f.getSource()), tests.stream()));
+            }
         });
 
         features.add(DynamicTest.dynamicTest("Finish Cucumber", context::finishTestRun));
