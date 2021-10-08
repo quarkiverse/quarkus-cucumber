@@ -47,11 +47,6 @@ public class QuarkusCucumberOptionsProvider implements CucumberOptionsAnnotation
         }
 
         @Override
-        public boolean strict() {
-            return true;
-        }
-
-        @Override
         public String[] features() {
             return annotation.features();
         }

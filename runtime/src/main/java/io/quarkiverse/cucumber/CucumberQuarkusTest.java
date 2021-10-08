@@ -44,9 +44,7 @@ import io.cucumber.core.runtime.ExitStatus;
 import io.cucumber.core.runtime.FeaturePathFeatureSupplier;
 import io.cucumber.core.runtime.FeatureSupplier;
 import io.cucumber.core.runtime.ObjectFactorySupplier;
-import io.cucumber.core.runtime.ScanningTypeRegistryConfigurerSupplier;
 import io.cucumber.core.runtime.TimeServiceEventBus;
-import io.cucumber.core.runtime.TypeRegistryConfigurerSupplier;
 import io.cucumber.java.JavaBackendProviderService;
 import io.cucumber.plugin.event.EventHandler;
 import io.cucumber.plugin.event.PickleStepTestStep;
@@ -78,8 +76,7 @@ public abstract class CucumberQuarkusTest {
         RuntimeOptionsBuilder runtimeOptionsBuilder = new RuntimeOptionsBuilder()
                 .addDefaultFeaturePathIfAbsent()
                 .addDefaultGlueIfAbsent()
-                .addDefaultFormatterIfAbsent()
-                .addDefaultSummaryPrinterIfAbsent();
+                .addDefaultSummaryPrinterIfNotDisabled();
 
         QuarkusCucumberOptionsProvider optionsProvider = new QuarkusCucumberOptionsProvider();
         if (optionsProvider.hasOptions(this.getClass())) {
@@ -110,18 +107,12 @@ public abstract class CucumberQuarkusTest {
 
         ObjectFactorySupplier objectFactorySupplier = () -> objectFactory;
 
-        TypeRegistryConfigurerSupplier typeRegistryConfigurerSupplier = new ScanningTypeRegistryConfigurerSupplier(
-                () -> Thread.currentThread()
-                        .getContextClassLoader(),
-                runtimeOptions);
-
         Runner runner = new Runner(eventBus,
                 Collections.singleton(new JavaBackendProviderService().create(objectFactorySupplier.get(),
                         objectFactorySupplier.get(),
                         () -> Thread.currentThread()
                                 .getContextClassLoader())),
                 objectFactorySupplier.get(),
-                typeRegistryConfigurerSupplier.get(),
                 runtimeOptions);
 
         CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, () -> runner);
