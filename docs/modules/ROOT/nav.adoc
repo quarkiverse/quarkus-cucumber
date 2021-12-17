@@ -1,1 +1,1 @@
-* xref:index.adoc[Quarkus - Cucumber]
+* xref:index.adoc[Quarkus Cucumber]
