@@ -23,6 +23,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "tisoft",
+      "name": "Markus Heberling",
+      "avatar_url": "https://avatars.githubusercontent.com/u/139041?v=4",
+      "profile": "http://markus.heberling.net",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
