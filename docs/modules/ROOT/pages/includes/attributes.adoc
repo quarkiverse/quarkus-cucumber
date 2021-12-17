@@ -1,4 +1,4 @@
-:quarkus-cucumber-version: 0.4.0
+:quarkus-cucumber-version: 0.5.0
 :maven-version: 3.8.1+
 
 :quarkus-org-url: https://github.com/quarkusio
