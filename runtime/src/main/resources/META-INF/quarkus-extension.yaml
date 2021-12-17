@@ -1,11 +1,11 @@
 name: Cucumber
-description: Cucumber allows you to run tests using Cucumber.
+description: Run tests using Cucumber
 metadata:
   keywords:
     - cucumber
     - test
     - testing
-#  guide: ...
+  guide: https://quarkiverse.github.io/quarkiverse-docs/quarkus-cucumber/dev/index.html
 #  categories:
 #    - "miscellaneous"
   status: "experimental"

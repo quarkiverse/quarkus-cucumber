@@ -1,4 +1,6 @@
-= Quarkus - Cucumber
+= Quarkus Cucumber
+include::./includes/attributes.adoc[]
+
 :extension-status: experimental
 
 This extension allows you to use https://cucumber.io/[Cucumber] to test your Quarkus application.
@@ -8,11 +10,12 @@ This extension allows you to use https://cucumber.io/[Cucumber] to test your Qua
 If you want to use this extension, you need to add the `io.quarkiverse.cucumber:quarkus-cucumber` extension first.
 In your `pom.xml` file, add:
 
-[source,xml]
+[source,xml,subs=attributes+]
 ----
 <dependency>
     <groupId>io.quarkiverse.cucumber</groupId>
     <artifactId>quarkus-cucumber</artifactId>
+    <version>{quarkus-cucumber-version}</version>
 </dependency>
 ----
 
@@ -51,5 +54,11 @@ public class MyTest extends CucumberQuarkusTest {
         runMain(MyTest.class, args);
     }
 }
-
 ----
+
+////
+Uncomment if we end up having configuration properties for this extension
+== Configuration Reference
+
+include::includes/quarkus-cucumber.adoc[]
+////
