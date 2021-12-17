@@ -14,6 +14,15 @@
         "code",
         "maintenance"
       ]
+    },
+    {
+      "login": "christophd",
+      "name": "Christoph Deppisch",
+      "avatar_url": "https://avatars.githubusercontent.com/u/195264?v=4",
+      "profile": "https://citrusframework.org",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
