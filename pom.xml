@@ -24,7 +24,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.version>2.14.2.Final</quarkus.version>
-        <cucumber.version>7.9.0</cucumber.version>
+        <cucumber.version>7.11.0</cucumber.version>
     </properties>
     <dependencyManagement>
         <dependencies>
