@@ -1,6 +1,7 @@
 package io.quarkiverse.cucumber;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Clock;
@@ -49,6 +50,7 @@ import io.cucumber.core.runtime.ObjectFactorySupplier;
 import io.cucumber.core.runtime.TimeServiceEventBus;
 import io.cucumber.java.JavaBackendProviderService;
 import io.cucumber.plugin.event.EventHandler;
+import io.cucumber.plugin.event.Location;
 import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.Status;
 import io.cucumber.plugin.event.TestCaseFinished;
@@ -137,49 +139,51 @@ public abstract class CucumberQuarkusTest {
 
         featureSupplier.get().forEach(f -> {
             List<DynamicTest> tests = new LinkedList<>();
-            tests.add(DynamicTest.dynamicTest("Start Feature", () -> context.beforeFeature(f)));
+            tests.add(DynamicTest.dynamicTest("Start Feature",
+                    getTestSourceUri(f.getUri(), f.getLocation()), () -> context.beforeFeature(f)));
             f.getPickles()
                     .stream()
                     .filter(filters)
-                    .forEach(p -> tests.add(DynamicTest.dynamicTest(p.getName(), () -> {
-                        AtomicReference<TestStepFinished> resultAtomicReference = new AtomicReference<>();
-                        EventHandler<TestStepFinished> handler = event -> {
-                            if (event.getResult().getStatus() != Status.PASSED) {
-                                // save the first failed test step, so that we can get the line number of the
-                                // cucumber file
-                                resultAtomicReference.compareAndSet(null, event);
-                            }
-                        };
+                    .forEach(p -> tests.add(DynamicTest.dynamicTest(p.getName(),
+                            getTestSourceUri(p.getUri(), p.getLocation()), () -> {
+                                AtomicReference<TestStepFinished> resultAtomicReference = new AtomicReference<>();
+                                EventHandler<TestStepFinished> handler = event -> {
+                                    if (event.getResult().getStatus() != Status.PASSED) {
+                                        // save the first failed test step, so that we can get the line number of the
+                                        // cucumber file
+                                        resultAtomicReference.compareAndSet(null, event);
+                                    }
+                                };
 
-                        eventBus.registerHandlerFor(TestCaseStarted.class, scenarioStartedHandler);
-                        eventBus.registerHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
-                        eventBus.registerHandlerFor(TestStepFinished.class, handler);
-                        context.runTestCase(r -> r.runPickle(p));
-                        eventBus.removeHandlerFor(TestStepFinished.class, handler);
-                        eventBus.removeHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
-                        eventBus.removeHandlerFor(TestCaseStarted.class, scenarioStartedHandler);
+                                eventBus.registerHandlerFor(TestCaseStarted.class, scenarioStartedHandler);
+                                eventBus.registerHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
+                                eventBus.registerHandlerFor(TestStepFinished.class, handler);
+                                context.runTestCase(r -> r.runPickle(p));
+                                eventBus.removeHandlerFor(TestStepFinished.class, handler);
+                                eventBus.removeHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
+                                eventBus.removeHandlerFor(TestCaseStarted.class, scenarioStartedHandler);
 
-                        // if we have no main arguments, we are running as part of a junit test suite,
-                        // we need to fail the junit test explicitly
-                        if (resultAtomicReference.get() != null) {
-                            TestStep testStep = resultAtomicReference.get().getTestStep();
-                            if (testStep instanceof PickleStepTestStep) {
-                                // failed in step, we have a line in the feature file
-                                Assertions.fail(
-                                        "failed in " + f.getUri() + " at line "
-                                                + ((PickleStepTestStep) testStep).getStep()
-                                                        .getLocation()
-                                                        .getLine(),
-                                        resultAtomicReference.get().getResult().getError());
-                            } else {
-                                // failed somewhere in hooks
-                                Assertions.fail(
-                                        "failed in " + f.getUri() + " at "
-                                                + testStep.getCodeLocation(),
-                                        resultAtomicReference.get().getResult().getError());
-                            }
-                        }
-                    })));
+                                // if we have no main arguments, we are running as part of a junit test suite,
+                                // we need to fail the junit test explicitly
+                                if (resultAtomicReference.get() != null) {
+                                    TestStep testStep = resultAtomicReference.get().getTestStep();
+                                    if (testStep instanceof PickleStepTestStep) {
+                                        // failed in step, we have a line in the feature file
+                                        Assertions.fail(
+                                                "failed in " + f.getUri() + " at line "
+                                                        + ((PickleStepTestStep) testStep).getStep()
+                                                                .getLocation()
+                                                                .getLine(),
+                                                resultAtomicReference.get().getResult().getError());
+                                    } else {
+                                        // failed somewhere in hooks
+                                        Assertions.fail(
+                                                "failed in " + f.getUri() + " at "
+                                                        + testStep.getCodeLocation(),
+                                                resultAtomicReference.get().getResult().getError());
+                                    }
+                                }
+                            })));
 
             if (tests.size() > 1) {
                 features.add(DynamicContainer.dynamicContainer(f.getName().orElse(f.getSource()), tests.stream()));
@@ -201,6 +205,29 @@ public abstract class CucumberQuarkusTest {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns precise position of Feature or Scenario executed
+     *
+     * @param uri file uri of feature or scenario retrieved from
+     * @param location location in a file, specifically the line
+     * @return URI compatible with Junit
+     */
+    private static URI getTestSourceUri(URI uri, Location location) {
+        return Optional.of(uri)
+                .map(feature -> Thread.currentThread().getContextClassLoader()
+                        .getResource(feature.getSchemeSpecificPart()))
+                .map(url -> {
+                    try {
+                        return url.toURI();
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .map(fileUri -> URI.create(fileUri + "?line=" + location.getLine()))
+                .orElse(null);
     }
 
     static boolean isPrettyFormatterEnabled(Class<?> testClassWithCucumberOptions) {
