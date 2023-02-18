@@ -148,7 +148,6 @@ public abstract class CucumberQuarkusTest {
      * @param uri      file uri of feature or scenario retrieved from
      * @param location location in a file, specifically the line
      * @return URI compatible with Junit
-     * @throws URISyntaxException
      */
     private static URI getTestSourceUri(@NotNull URI uri, @NotNull Location location) {
         return Optional.of(uri)
