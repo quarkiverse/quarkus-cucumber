@@ -1,56 +1,34 @@
 package io.quarkiverse.cucumber;
 
-import java.net.URI;
-import java.time.Clock;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.platform.console.ConsoleLauncher;
-
 import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.feature.FeatureParser;
 import io.cucumber.core.filter.Filters;
 import io.cucumber.core.gherkin.Pickle;
-import io.cucumber.core.options.CommandlineOptionsParser;
-import io.cucumber.core.options.Constants;
-import io.cucumber.core.options.CucumberOptionsAnnotationParser;
-import io.cucumber.core.options.CucumberProperties;
-import io.cucumber.core.options.CucumberPropertiesParser;
-import io.cucumber.core.options.RuntimeOptions;
-import io.cucumber.core.options.RuntimeOptionsBuilder;
+import io.cucumber.core.options.*;
 import io.cucumber.core.plugin.Options;
 import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.plugin.PrettyFormatter;
 import io.cucumber.core.runner.Runner;
-import io.cucumber.core.runtime.CucumberExecutionContext;
-import io.cucumber.core.runtime.ExitStatus;
-import io.cucumber.core.runtime.FeaturePathFeatureSupplier;
-import io.cucumber.core.runtime.FeatureSupplier;
-import io.cucumber.core.runtime.ObjectFactorySupplier;
-import io.cucumber.core.runtime.TimeServiceEventBus;
+import io.cucumber.core.runtime.*;
 import io.cucumber.java.JavaBackendProviderService;
-import io.cucumber.plugin.event.EventHandler;
-import io.cucumber.plugin.event.PickleStepTestStep;
-import io.cucumber.plugin.event.Status;
-import io.cucumber.plugin.event.TestStepFinished;
+import io.cucumber.plugin.event.*;
 import io.quarkus.test.junit.QuarkusTest;
+import io.smallrye.common.constraint.NotNull;
+import org.junit.jupiter.api.*;
+import org.junit.platform.console.ConsoleLauncher;
+
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Clock;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @QuarkusTest
 public abstract class CucumberQuarkusTest {
@@ -124,32 +102,35 @@ public abstract class CucumberQuarkusTest {
 
         featureSupplier.get().forEach(f -> {
             List<DynamicTest> tests = new LinkedList<>();
-            tests.add(DynamicTest.dynamicTest("Start Feature", () -> context.beforeFeature(f)));
+            tests.add(DynamicTest.dynamicTest("Start Feature",
+                    getTestSourceUri(f.getUri(), f.getLocation()), () -> context.beforeFeature(f)));
             f.getPickles()
                     .stream()
                     .filter(filters)
-                    .forEach(p -> tests.add(DynamicTest.dynamicTest(p.getName(), () -> {
-                        AtomicReference<TestStepFinished> resultAtomicReference = new AtomicReference<>();
-                        EventHandler<TestStepFinished> handler = event -> {
-                            if (event.getResult().getStatus() != Status.PASSED) {
-                                // save the first failed test step, so that we can get the line number of the cucumber file
-                                resultAtomicReference.compareAndSet(null, event);
-                            }
-                        };
-                        eventBus.registerHandlerFor(TestStepFinished.class, handler);
-                        context.runTestCase(r -> r.runPickle(p));
-                        eventBus.removeHandlerFor(TestStepFinished.class, handler);
+                    .forEach(p -> tests.add(DynamicTest.dynamicTest(p.getName(), getTestSourceUri(p.getUri(), p.getLocation()),
+                            () -> {
+                                AtomicReference<TestStepFinished> resultAtomicReference = new AtomicReference<>();
+                                EventHandler<TestStepFinished> handler = event -> {
+                                    if (event.getResult().getStatus() != Status.PASSED) {
+                                        // save the first failed test step, so that we can get the line number of the cucumber file
+                                        resultAtomicReference.compareAndSet(null, event);
+                                    }
+                                };
+                                eventBus.registerHandlerFor(TestStepFinished.class, handler);
+                                context.runTestCase(r -> r.runPickle(p));
+                                eventBus.removeHandlerFor(TestStepFinished.class, handler);
 
-                        // if we have no main arguments, we are running as part of a junit test suite, we need to fail the junit test explicitly
-                        if (resultAtomicReference.get() != null) {
-                            Assertions.fail(
-                                    "failed in " + f.getUri() + " at line "
-                                            + ((PickleStepTestStep) resultAtomicReference.get().getTestStep()).getStep()
+                                // if we have no main arguments, we are running as part of a junit test suite, we need to fail the junit test explicitly
+                                if (resultAtomicReference.get() != null) {
+                                    Assertions.fail(
+                                            "failed in " + f.getUri() + " at line "
+                                                    + ((PickleStepTestStep) resultAtomicReference
+                                                    .get().getTestStep()).getStep()
                                                     .getLocation()
                                                     .getLine(),
-                                    resultAtomicReference.get().getResult().getError());
-                        }
-                    })));
+                                            resultAtomicReference.get().getResult().getError());
+                                }
+                            })));
 
             if (tests.size() > 1) {
                 features.add(DynamicContainer.dynamicContainer(f.getName().orElse(f.getSource()), tests.stream()));
@@ -159,6 +140,30 @@ public abstract class CucumberQuarkusTest {
         features.add(DynamicTest.dynamicTest("Finish Cucumber", context::finishTestRun));
 
         return features;
+    }
+
+    /**
+     * Returns precise position of Feature or Scenario executed
+     *
+     * @param uri      file uri of feature or scenario retrieved from
+     * @param location location in a file, specifically the line
+     * @return URI compatible with Junit
+     * @throws URISyntaxException
+     */
+    private static URI getTestSourceUri(@NotNull URI uri, @NotNull Location location) {
+        return Optional.of(uri)
+                .map(feature -> Thread.currentThread().getContextClassLoader()
+                        .getResource(feature.getSchemeSpecificPart()))
+                .map(url -> {
+                    try {
+                        return url.toURI();
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .map(fileUri -> URI.create(fileUri + "?line=" + location.getLine()))
+                .orElse(null);
     }
 
     public static class CdiObjectFactory implements ObjectFactory {
