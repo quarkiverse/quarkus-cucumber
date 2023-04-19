@@ -8,7 +8,7 @@
     </parent>
     <groupId>io.quarkiverse.cucumber</groupId>
     <artifactId>quarkus-cucumber-parent</artifactId>
-    <version>1.0.0</version>
+    <version>999-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Quarkus - Cucumber - Parent</name>
     <modules>
@@ -71,8 +71,4 @@
             </modules>
         </profile>
     </profiles>
-
-  <scm>
-    <tag>1.0.0</tag>
-  </scm>
 </project>
