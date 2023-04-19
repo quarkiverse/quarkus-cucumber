@@ -49,6 +49,7 @@ import io.cucumber.java.JavaBackendProviderService;
 import io.cucumber.plugin.event.EventHandler;
 import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.Status;
+import io.cucumber.plugin.event.TestStep;
 import io.cucumber.plugin.event.TestStepFinished;
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -142,12 +143,22 @@ public abstract class CucumberQuarkusTest {
 
                         // if we have no main arguments, we are running as part of a junit test suite, we need to fail the junit test explicitly
                         if (resultAtomicReference.get() != null) {
-                            Assertions.fail(
-                                    "failed in " + f.getUri() + " at line "
-                                            + ((PickleStepTestStep) resultAtomicReference.get().getTestStep()).getStep()
-                                                    .getLocation()
-                                                    .getLine(),
-                                    resultAtomicReference.get().getResult().getError());
+                            TestStep testStep = resultAtomicReference.get().getTestStep();
+                            if (testStep instanceof PickleStepTestStep) {
+                                // failed in step, we have a line in the feature file
+                                Assertions.fail(
+                                        "failed in " + f.getUri() + " at line "
+                                                + ((PickleStepTestStep) testStep).getStep()
+                                                        .getLocation()
+                                                        .getLine(),
+                                        resultAtomicReference.get().getResult().getError());
+                            } else {
+                                // failed somewhere in hooks
+                                Assertions.fail(
+                                        "failed in " + f.getUri() + " at "
+                                                + testStep.getCodeLocation(),
+                                        resultAtomicReference.get().getResult().getError());
+                            }
                         }
                     })));
 
