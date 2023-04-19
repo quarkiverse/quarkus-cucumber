@@ -2,7 +2,7 @@ package io.quarkiverse.cucumber.test;
 
 import static io.restassured.RestAssured.given;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
