@@ -23,13 +23,17 @@
   </scm>
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
+
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <skipITs>false</skipITs>
+
     <quarkus.version>3.0.3.Final</quarkus.version>
     <cucumber.version>7.11.2</cucumber.version>
+    <weld.version>4.0.0.Final</weld.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -45,6 +49,11 @@
         <artifactId>cucumber-java</artifactId>
         <version>${cucumber.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jboss.weld</groupId>
+        <artifactId>weld-junit5</artifactId>
+        <version>${weld.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <build>
@@ -58,6 +67,26 @@
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${compiler-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${version.surefire.plugin}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+              <configuration>
+                <skip>skipITs</skip>
+                <systemPropertyVariables>
+                  <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                  <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                  <maven.home>${maven.home}</maven.home>
+                </systemPropertyVariables>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

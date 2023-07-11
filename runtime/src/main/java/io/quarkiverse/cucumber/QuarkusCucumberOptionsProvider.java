@@ -9,22 +9,20 @@ import io.cucumber.core.snippets.SnippetType;
  * Derived from JUnit4 Cucumber options provider.
  */
 public class QuarkusCucumberOptionsProvider implements CucumberOptionsAnnotationParser.OptionsProvider {
-
     @Override
     public CucumberOptionsAnnotationParser.CucumberOptions getOptions(Class<?> clazz) {
         if (hasOptions(clazz)) {
             CucumberOptions annotation = clazz.getAnnotation(CucumberOptions.class);
             return new QuarkusCucumberOptionsProvider.QuarkusCucumberOptions(annotation);
         }
-
         return null;
     }
 
     /**
      * Checks if {@link io.quarkiverse.cucumber.CucumberOptions} annotation is present on given class.
      *
-     * @param clazz
-     * @return
+     * @param clazz to check
+     * @return {@code true} if class has options, {@code false} otherwise
      */
     public boolean hasOptions(Class<?> clazz) {
         return clazz.getAnnotation(CucumberOptions.class) != null;
@@ -34,7 +32,6 @@ public class QuarkusCucumberOptionsProvider implements CucumberOptionsAnnotation
      * Options implementation using given annotation to retrieve Cucumber settings.
      */
     private static class QuarkusCucumberOptions implements CucumberOptionsAnnotationParser.CucumberOptions {
-
         private final CucumberOptions annotation;
 
         QuarkusCucumberOptions(CucumberOptions annotation) {
@@ -95,6 +92,5 @@ public class QuarkusCucumberOptionsProvider implements CucumberOptionsAnnotation
         public Class<? extends ObjectFactory> objectFactory() {
             return annotation.objectFactory();
         }
-
     }
 }

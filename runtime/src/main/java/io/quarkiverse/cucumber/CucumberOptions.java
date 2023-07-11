@@ -19,9 +19,8 @@ import io.cucumber.plugin.Plugin;
 @Target({ ElementType.TYPE })
 @API(status = API.Status.STABLE)
 public @interface CucumberOptions {
-
     /**
-     * @return true if glue code execution should be skipped.
+     * @return true if glue code execution should be skipped
      */
     boolean dryRun() default false;
 
@@ -34,7 +33,7 @@ public @interface CucumberOptions {
      * {@code com.example.RunCucumber} then features are assumed to be located
      * in {@code classpath:com/example}.
      *
-     * @return list of files or directories
+     * @return array of files or directories
      * @see io.cucumber.core.feature.FeatureWithLines
      */
     String[] features() default {};
@@ -48,7 +47,7 @@ public @interface CucumberOptions {
      * {@code com.example.RunCucumber} then glue is assumed to be located in
      * {@code com.example}.
      *
-     * @return list of package names
+     * @return array of package names
      * @see io.cucumber.core.feature.GluePath
      */
     String[] glue() default {};
@@ -60,7 +59,7 @@ public @interface CucumberOptions {
      * These packages are used in addition to the default described in
      * {@code #glue}.
      *
-     * @return list of package names
+     * @return array of package names
      */
     String[] extraGlue() default {};
 
@@ -84,21 +83,21 @@ public @interface CucumberOptions {
      * Plugins can be provided with an argument. For example
      * {@code json:target/cucumber-report.json}
      *
-     * @return list of plugins
+     * @return array of plugins
      * @see Plugin
      */
     String[] plugin() default {};
 
     /**
-     * Publish report to https://reports.cucumber.io.
+     * Publish report to <a href=https://reports.cucumber.io>https://reports.cucumber.io</a>.
      * <p>
      *
-     * @return true if reports should be published on the web.
+     * @return {@code true} if reports should be published on the web
      */
     boolean publish() default false;
 
     /**
-     * @return true if terminal output should be without colours.
+     * @return {@code true} if terminal output should be without colours
      */
     boolean monochrome() default false;
 
@@ -106,12 +105,12 @@ public @interface CucumberOptions {
      * Only run scenarios whose names match one of the provided regular
      * expressions.
      *
-     * @return a list of regular expressions
+     * @return an array of regular expressions
      */
     String[] name() default {};
 
     /**
-     * @return the format of the generated snippets.
+     * @return the format of the generated snippets
      */
     SnippetType snippets() default SnippetType.UNDERSCORE;
 
@@ -124,6 +123,5 @@ public @interface CucumberOptions {
      *
      * @return an {@link io.cucumber.core.backend.ObjectFactory} implementation
      */
-    Class<? extends ObjectFactory> objectFactory() default CucumberQuarkusTest.CdiObjectFactory.class;
-
+    Class<? extends ObjectFactory> objectFactory() default CucumberBaseTest.CdiObjectFactory.class;
 }

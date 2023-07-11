@@ -5,7 +5,6 @@ import jakarta.ws.rs.Path;
 
 @Path("/")
 public class Endpoint {
-
     @GET
     public String hello() {
         return "hello";

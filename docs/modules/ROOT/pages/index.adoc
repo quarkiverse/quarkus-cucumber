@@ -21,6 +21,8 @@ In your `pom.xml` file, add:
 
 == Usage
 
+=== Quarkus Test setup
+
 To bootstrap Cucumber add the following class to your test suite:
 
 [source,java]
@@ -28,12 +30,45 @@ To bootstrap Cucumber add the following class to your test suite:
 import io.quarkiverse.cucumber.CucumberQuarkusTest;
 
 public class MyTest extends CucumberQuarkusTest {
-
 }
-
 ----
 
 This will automatically bootstrap Cucumber, and discover any `.feature` files and step classes that provide glue code.
+
+=== Integration test setup
+
+For integration tests to work, the `weld-junit5` extension is used and preconfigured. Aside from enabling integration test support, it also enabled basic injection support.
+
+To run a cucumber test as integration test just extend `CucumberQuarkusIntegrationTest`:
+
+[source,java]
+----
+import io.quarkiverse.cucumber.CucumberQuarkusIntegrationTest;
+
+public class MyIT extends CucumberQuarkusIntegrationTest {
+}
+----
+
+In case the integration test is located in a sibling-package of other bean-defining classes, we have to configure the packages to scan:
+
+[source,java]
+----
+import io.quarkiverse.cucumber.CucumberIntegrationTest;
+
+public class MyIT extends CucumberQuarkusIntegrationTest {
+    @Override
+    protected Class<?>[] packagesToScanRecursively() {
+        return new Class[] { SomeClassInASiblingPackage.class, SomeClassInAnotherSiblingPackage.class };
+    }
+}
+----
+
+Weld will scan these packages recursively. This means that if a class is located in a package that is a parent of all other bean-defining packages, it is sufficient to reference this bean (see `CucumberOptionsIT` for an example).
+
+As of now, the injection support has the following limitations:
+
+* Only beans with `@ApplicationScoped` are detected
+* classes defining the glue need to be annotated with `@ApplicationScoped`
 
 == IDE Integration
 
@@ -50,7 +85,7 @@ You need to add the following `main` method to your test class:
 import io.quarkiverse.cucumber.CucumberQuarkusTest;
 
 public class MyTest extends CucumberQuarkusTest {
-    public static void main(String[] args) {
+    public static void main(String... args) {
         runMain(MyTest.class, args);
     }
 }

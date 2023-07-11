@@ -1,4 +1,4 @@
-package io.quarkiverse.cucumber.deployment;
+package io.quarkiverse.cucumber;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -8,7 +8,6 @@ import org.jboss.jandex.DotName;
 
 import io.cucumber.java.StepDefinitionAnnotation;
 import io.cucumber.java.StepDefinitionAnnotations;
-import io.quarkiverse.cucumber.CucumberQuarkusTest;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.processor.DotNames;
 import io.quarkus.deployment.annotations.BuildStep;
@@ -16,8 +15,8 @@ import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.IndexDependencyBuildItem;
 
+@SuppressWarnings("unused")
 class CucumberProcessor {
-
     private static final String FEATURE = "cucumber";
 
     @BuildStep
@@ -51,6 +50,10 @@ class CucumberProcessor {
         }
         for (var i : indexBuildItem.getIndex()
                 .getAllKnownSubclasses(DotName.createSimple(CucumberQuarkusTest.class.getName()))) {
+            stepClasses.add(i.name().toString());
+        }
+        for (var i : indexBuildItem.getIndex()
+                .getAllKnownSubclasses(DotName.createSimple(CucumberQuarkusIntegrationTest.class.getName()))) {
             stepClasses.add(i.name().toString());
         }
         return AdditionalBeanBuildItem.builder().addBeanClasses(stepClasses).setDefaultScope(DotNames.SINGLETON)
