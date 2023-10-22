@@ -1,6 +1,9 @@
 package io.quarkiverse.cucumber;
 
+import java.util.UUID;
+
 import io.cucumber.core.backend.ObjectFactory;
+import io.cucumber.core.eventbus.UuidGenerator;
 import io.cucumber.core.options.CucumberOptionsAnnotationParser;
 import io.cucumber.core.snippets.SnippetType;
 
@@ -96,5 +99,17 @@ public class QuarkusCucumberOptionsProvider implements CucumberOptionsAnnotation
             return annotation.objectFactory();
         }
 
+        @Override
+        public Class<? extends UuidGenerator> uuidGenerator() {
+            return DefaultUuidGenerator.class;
+        }
+
+    }
+
+    public static final class DefaultUuidGenerator implements UuidGenerator {
+        @Override
+        public UUID generateId() {
+            return UUID.randomUUID();
+        }
     }
 }
