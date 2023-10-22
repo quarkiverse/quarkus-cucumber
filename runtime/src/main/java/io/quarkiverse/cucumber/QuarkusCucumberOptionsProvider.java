@@ -23,8 +23,8 @@ public class QuarkusCucumberOptionsProvider implements CucumberOptionsAnnotation
     /**
      * Checks if {@link io.quarkiverse.cucumber.CucumberOptions} annotation is present on given class.
      *
-     * @param clazz
-     * @return
+     * @param clazz a given class to check
+     * @return boolean value
      */
     public boolean hasOptions(Class<?> clazz) {
         return clazz.getAnnotation(CucumberOptions.class) != null;
