@@ -40,7 +40,7 @@ public @interface CucumberOptions {
     String[] features() default {};
 
     /**
-     * Package to load glue code (step definitions, hooks and plugins) from.
+     * Package to load glue code (step definitions, hooks, and plugins) from.
      * E.g: {@code com.example.app}
      * <p>
      * When no glue is provided, Cucumber will use the package of the annotated
@@ -54,7 +54,7 @@ public @interface CucumberOptions {
     String[] glue() default {};
 
     /**
-     * Package to load additional glue code (step definitions, hooks and
+     * Package to load additional glue code (step definitions, hooks, and
      * plugins) from. E.g: {@code com.example.app}
      * <p>
      * These packages are used in addition to the default described in
@@ -90,7 +90,7 @@ public @interface CucumberOptions {
     String[] plugin() default {};
 
     /**
-     * Publish report to <a href="https://reports.cucumber.io">Cucumber Reports</a>.
+     * Publish a report to <a href="https://reports.cucumber.io">Cucumber Reports</a>.
      * <p>
      *
      * @return true if reports should be published on the web.
@@ -98,7 +98,7 @@ public @interface CucumberOptions {
     boolean publish() default false;
 
     /**
-     * @return true if terminal output should be without colours.
+     * @return true if terminal output should be without colors.
      */
     boolean monochrome() default false;
 
