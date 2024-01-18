@@ -104,19 +104,7 @@ public abstract class CucumberQuarkusTest {
         } else {
             plugins.setEventBusOnEventListenerPlugins(eventBus);
         }
-        ObjectFactory objectFactory = new CdiObjectFactory();
-
-        ObjectFactorySupplier objectFactorySupplier = () -> objectFactory;
-
-        Runner runner = new Runner(eventBus,
-                Collections.singleton(new JavaBackendProviderService().create(objectFactorySupplier.get(),
-                        objectFactorySupplier.get(),
-                        () -> Thread.currentThread()
-                                .getContextClassLoader())),
-                objectFactorySupplier.get(),
-                runtimeOptions);
-
-        CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, () -> runner);
+        CucumberExecutionContext context = cucumberExecutionContext(eventBus, runtimeOptions, exitStatus);
 
         List<DynamicNode> features = new LinkedList<>();
         features.add(DynamicTest.dynamicTest("Start Cucumber", context::startTestRun));
@@ -170,6 +158,23 @@ public abstract class CucumberQuarkusTest {
         features.add(DynamicTest.dynamicTest("Finish Cucumber", context::finishTestRun));
 
         return features;
+    }
+
+    private static CucumberExecutionContext cucumberExecutionContext(EventBus eventBus, RuntimeOptions runtimeOptions,
+            ExitStatus exitStatus) {
+        ObjectFactory objectFactory = new CdiObjectFactory();
+
+        ObjectFactorySupplier objectFactorySupplier = () -> objectFactory;
+
+        Runner runner = new Runner(eventBus,
+                Collections.singleton(new JavaBackendProviderService().create(objectFactorySupplier.get(),
+                        objectFactorySupplier.get(),
+                        () -> Thread.currentThread()
+                                .getContextClassLoader())),
+                objectFactorySupplier.get(),
+                runtimeOptions);
+
+        return new CucumberExecutionContext(eventBus, exitStatus, () -> runner);
     }
 
     public static class CdiObjectFactory implements ObjectFactory {
