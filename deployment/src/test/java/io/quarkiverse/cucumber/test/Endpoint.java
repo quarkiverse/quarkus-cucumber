@@ -8,6 +8,6 @@ public class Endpoint {
 
     @GET
     public String hello() {
-        return "hello";
+        return Factory.hello();
     }
 }

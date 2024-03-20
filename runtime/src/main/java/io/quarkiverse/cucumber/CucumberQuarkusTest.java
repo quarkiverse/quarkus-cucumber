@@ -108,6 +108,7 @@ public abstract class CucumberQuarkusTest {
 
         List<DynamicNode> features = new LinkedList<>();
         features.add(DynamicTest.dynamicTest("Start Cucumber", context::startTestRun));
+        features.add(DynamicTest.dynamicTest("Before All Features", context::runBeforeAllHooks));
 
         Predicate<Pickle> filters = new Filters(runtimeOptions);
 
@@ -155,6 +156,7 @@ public abstract class CucumberQuarkusTest {
             }
         });
 
+        features.add(DynamicTest.dynamicTest("After All Features", context::runAfterAllHooks));
         features.add(DynamicTest.dynamicTest("Finish Cucumber", context::finishTestRun));
 
         return features;
