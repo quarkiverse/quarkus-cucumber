@@ -22,7 +22,7 @@
     <url>https://github.com/quarkiverse/quarkus-cucumber</url>
   </scm>
   <properties>
-    <quarkus.version>3.11.1</quarkus.version>
+    <quarkus.version>3.13.0</quarkus.version>
     <cucumber.version>7.18.0</cucumber.version>
   </properties>
   <dependencyManagement>
