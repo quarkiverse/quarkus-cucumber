@@ -49,8 +49,10 @@ import io.cucumber.java.JavaBackendProviderService;
 import io.cucumber.plugin.event.EventHandler;
 import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.Status;
+import io.cucumber.plugin.event.TestCaseFinished;
 import io.cucumber.plugin.event.TestStep;
 import io.cucumber.plugin.event.TestStepFinished;
+import io.quarkus.arc.Arc;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
@@ -112,6 +114,13 @@ public abstract class CucumberQuarkusTest {
 
         Predicate<Pickle> filters = new Filters(runtimeOptions);
 
+        EventHandler<TestCaseFinished> scenarioFinishedHandler = __ -> {
+            var scenarioContext = Arc.container().getActiveContext(ScenarioScope.class);
+            if (scenarioContext != null) {
+                scenarioContext.destroy();
+            }
+        };
+
         featureSupplier.get().forEach(f -> {
             List<DynamicTest> tests = new LinkedList<>();
             tests.add(DynamicTest.dynamicTest("Start Feature", () -> context.beforeFeature(f)));
@@ -126,9 +135,12 @@ public abstract class CucumberQuarkusTest {
                                 resultAtomicReference.compareAndSet(null, event);
                             }
                         };
+
+                        eventBus.registerHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
                         eventBus.registerHandlerFor(TestStepFinished.class, handler);
                         context.runTestCase(r -> r.runPickle(p));
                         eventBus.removeHandlerFor(TestStepFinished.class, handler);
+                        eventBus.removeHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
 
                         // if we have no main arguments, we are running as part of a junit test suite, we need to fail the junit test explicitly
                         if (resultAtomicReference.get() != null) {
@@ -155,7 +167,6 @@ public abstract class CucumberQuarkusTest {
                 features.add(DynamicContainer.dynamicContainer(f.getName().orElse(f.getSource()), tests.stream()));
             }
         });
-
         features.add(DynamicTest.dynamicTest("After All Features", context::runAfterAllHooks));
         features.add(DynamicTest.dynamicTest("Finish Cucumber", context::finishTestRun));
 

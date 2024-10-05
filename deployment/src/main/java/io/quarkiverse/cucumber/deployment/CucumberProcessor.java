@@ -9,8 +9,12 @@ import org.jboss.jandex.DotName;
 import io.cucumber.java.StepDefinitionAnnotation;
 import io.cucumber.java.StepDefinitionAnnotations;
 import io.quarkiverse.cucumber.CucumberQuarkusTest;
+import io.quarkiverse.cucumber.ScenarioContext;
+import io.quarkiverse.cucumber.ScenarioScope;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
-import io.quarkus.arc.processor.DotNames;
+import io.quarkus.arc.deployment.ContextRegistrationPhaseBuildItem;
+import io.quarkus.arc.deployment.ContextRegistrationPhaseBuildItem.ContextConfiguratorBuildItem;
+import io.quarkus.arc.deployment.CustomScopeBuildItem;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
@@ -53,7 +57,24 @@ class CucumberProcessor {
                 .getAllKnownSubclasses(DotName.createSimple(CucumberQuarkusTest.class.getName()))) {
             stepClasses.add(i.name().toString());
         }
-        return AdditionalBeanBuildItem.builder().addBeanClasses(stepClasses).setDefaultScope(DotNames.SINGLETON)
-                .setUnremovable().build();
+        return AdditionalBeanBuildItem.builder()
+                .addBeanClasses(stepClasses)
+                .setDefaultScope(DotName.createSimple(ScenarioScope.class.getName()))
+                .setUnremovable()
+                .build();
+    }
+
+    @BuildStep
+    ContextConfiguratorBuildItem scenarioContext(ContextRegistrationPhaseBuildItem contextRegistrationPhase) {
+        return new ContextConfiguratorBuildItem(
+                contextRegistrationPhase.getContext()
+                        .configure(ScenarioScope.class)
+                        .normal()
+                        .contextClass(ScenarioContext.class));
+    }
+
+    @BuildStep
+    CustomScopeBuildItem scenarioScope() {
+        return new CustomScopeBuildItem(DotName.createSimple(ScenarioScope.class.getName()));
     }
 }
