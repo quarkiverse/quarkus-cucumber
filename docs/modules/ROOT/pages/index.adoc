@@ -35,6 +35,49 @@ public class MyTest extends CucumberQuarkusTest {
 
 This will automatically bootstrap Cucumber, and discover any `.feature` files and step classes that provide glue code.
 
+== ScenarioScope
+
+The `@ScenarioScope` annotation allows you to define beans whose state is tied to the lifecycle of a Cucumber scenario. This means that the state of these beans will automatically reset between the execution of each scenario, without the need for manual cleanup.
+
+This feature is particularly useful for managing stateful beans in Cucumber tests, similar to the mechanism provided by Spring, as described in the https://cucumber.io/docs/cucumber/state/?lang=java[Cucumber documentation].
+
+=== Example
+
+The usage of `@ScenarioScope` is similar to other CDI scopes, such as `@ApplicationScoped`.
+Here's how you can define a `@ScenarioScope` bean and use it within your step definitions:
+
+[source,java]
+----
+import io.quarkiverse.cucumber.ScenarioScope;
+import jakarta.inject.Inject;
+
+@ScenarioScope
+public class MyStatefulBean {
+    private String state;
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+}
+
+public class MyStepDefinitions {
+
+    @Inject
+    MyStatefulBean myStatefulBean;
+
+    @Given("I set the state to {string}")
+    public void setState(String state) {
+        myStatefulBean.setState(state);
+    }
+}
+----
+
+In this example, `MyStatefulBean` is injected into the step definition class, and each scenario will have its own instance of the bean. This ensures that the state is isolated across different scenarios.
+
 == IDE Integration
 
 The test class can by run by any IDE with support for JUnit5.
