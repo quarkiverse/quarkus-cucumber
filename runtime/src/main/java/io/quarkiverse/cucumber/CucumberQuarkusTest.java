@@ -82,11 +82,12 @@ public abstract class CucumberQuarkusTest {
                 .addDefaultSummaryPrinterIfNotDisabled();
 
         QuarkusCucumberOptionsProvider optionsProvider = new QuarkusCucumberOptionsProvider();
-        if (optionsProvider.hasOptions(this.getClass())) {
+        final Class<? extends CucumberQuarkusTest> testClassWithCucumberOptions = findCucumberOptionAnnotatedClassSkippingProxies();
+        if (testClassWithCucumberOptions != null) {
             CucumberOptionsAnnotationParser annotationParser = new CucumberOptionsAnnotationParser()
                     .withOptionsProvider(optionsProvider);
             RuntimeOptions annotationOptions = annotationParser
-                    .parse(this.getClass())
+                    .parse(testClassWithCucumberOptions)
                     .build(systemOptions);
             runtimeOptions = runtimeOptionsBuilder.build(annotationOptions);
         } else {
@@ -171,6 +172,18 @@ public abstract class CucumberQuarkusTest {
         features.add(DynamicTest.dynamicTest("Finish Cucumber", context::finishTestRun));
 
         return features;
+    }
+
+    private Class<? extends CucumberQuarkusTest> findCucumberOptionAnnotatedClassSkippingProxies() {
+        for (Class<?> candidate = this.getClass(); candidate != CucumberQuarkusTest.class; candidate = candidate
+                .getSuperclass()) {
+            if (candidate.getAnnotation(CucumberOptions.class) != null) {
+                @SuppressWarnings("unchecked")
+                final var castCheckedInALoop = (Class<? extends CucumberQuarkusTest>) candidate;
+                return castCheckedInALoop;
+            }
+        }
+        return null;
     }
 
     private static CucumberExecutionContext cucumberExecutionContext(EventBus eventBus, RuntimeOptions runtimeOptions,
