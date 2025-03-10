@@ -6,11 +6,13 @@ import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.restassured.response.ValidatableResponse;
 
 public class Steps {
+    private static boolean fail = false;
 
     @Inject
     @ConfigProperty(name = "testPath", defaultValue = "/")
@@ -35,4 +37,18 @@ public class Steps {
         result.statusCode(200);
     }
 
+    @And("controlled failure")
+    public void controlled_failure() throws Exception {
+        if (fail) {
+            throw new AssertionError("Unexpected failure");
+        }
+    }
+
+    public static void enableControlledFailure() {
+        fail = true;
+    }
+
+    public static void disableControlledFailure() {
+        fail = false;
+    }
 }
