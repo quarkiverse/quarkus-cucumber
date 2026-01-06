@@ -1,6 +1,8 @@
 package io.quarkiverse.cucumber;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -261,7 +263,7 @@ public abstract class CucumberQuarkusTest {
         //--strict/--no-strict is already handled by the CommandlineOptionsParser EXECUTION_STRICT_PROPERTY_NAME
         System.setProperty(Constants.WIP_PROPERTY_NAME, String.valueOf(runtimeOptions.isWip()));
         System.setProperty(Constants.FEATURES_PROPERTY_NAME,
-                runtimeOptions.getFeaturePaths().stream().map(URI::toString).collect(Collectors.joining(",")));
+                runtimeOptions.getFeaturePaths().stream().map(Paths::get).map(Path::toString).collect(Collectors.joining(",")));
         System.setProperty(Constants.FILTER_NAME_PROPERTY_NAME,
                 runtimeOptions.getNameFilters().stream().map(Pattern::toString).collect(Collectors.joining(",")));
         System.setProperty(Constants.FILTER_TAGS_PROPERTY_NAME,
