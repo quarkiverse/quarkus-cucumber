@@ -8,6 +8,8 @@ import org.jboss.jandex.DotName;
 
 import io.cucumber.java.StepDefinitionAnnotation;
 import io.cucumber.java.StepDefinitionAnnotations;
+import io.quarkiverse.cucumber.AfterScenario;
+import io.quarkiverse.cucumber.BeforeScenario;
 import io.quarkiverse.cucumber.CucumberQuarkusTest;
 import io.quarkiverse.cucumber.ScenarioContext;
 import io.quarkiverse.cucumber.ScenarioScope;
@@ -15,6 +17,9 @@ import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.ContextRegistrationPhaseBuildItem;
 import io.quarkus.arc.deployment.ContextRegistrationPhaseBuildItem.ContextConfiguratorBuildItem;
 import io.quarkus.arc.deployment.CustomScopeBuildItem;
+import io.quarkus.arc.deployment.QualifierRegistrarBuildItem;
+import io.quarkus.arc.processor.QualifierRegistrar;
+import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
@@ -27,6 +32,21 @@ class CucumberProcessor {
     @BuildStep
     FeatureBuildItem feature() {
         return new FeatureBuildItem(FEATURE);
+    }
+
+    /**
+     * Register @BeforeScenario and @AfterScenario as CDI qualifiers.
+     */
+    @BuildStep
+    void registerScenarioQualifiers(BuildProducer<QualifierRegistrarBuildItem> qualifierRegistrar) {
+        qualifierRegistrar.produce(new QualifierRegistrarBuildItem(new QualifierRegistrar() {
+            @Override
+            public java.util.Map<DotName, java.util.Set<String>> getAdditionalQualifiers() {
+                return java.util.Map.of(
+                        DotName.createSimple(BeforeScenario.class.getName()), java.util.Set.of(),
+                        DotName.createSimple(AfterScenario.class.getName()), java.util.Set.of());
+            }
+        }));
     }
 
     /**
