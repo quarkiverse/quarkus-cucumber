@@ -52,6 +52,7 @@ import io.cucumber.plugin.event.EventHandler;
 import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.Status;
 import io.cucumber.plugin.event.TestCaseFinished;
+import io.cucumber.plugin.event.TestCaseStarted;
 import io.cucumber.plugin.event.TestStep;
 import io.cucumber.plugin.event.TestStepFinished;
 import io.quarkus.arc.Arc;
@@ -96,7 +97,8 @@ public abstract class CucumberQuarkusTest {
             runtimeOptions = runtimeOptionsBuilder.build(systemOptions);
         }
 
-        FeatureSupplier featureSupplier = new FeaturePathFeatureSupplier(() -> Thread.currentThread().getContextClassLoader(),
+        FeatureSupplier featureSupplier = new FeaturePathFeatureSupplier(
+                () -> Thread.currentThread().getContextClassLoader(),
                 runtimeOptions, parser);
 
         final Plugins plugins = new Plugins(new PluginFactory(), runtimeOptions);
@@ -117,7 +119,14 @@ public abstract class CucumberQuarkusTest {
 
         Predicate<Pickle> filters = new Filters(runtimeOptions);
 
-        EventHandler<TestCaseFinished> scenarioFinishedHandler = __ -> {
+        EventHandler<TestCaseStarted> scenarioStartedHandler = event -> {
+            fireScenarioEvent(new ScenarioEvent(event.getTestCase()), BeforeScenario.Literal.INSTANCE);
+        };
+
+        EventHandler<TestCaseFinished> scenarioFinishedHandler = event -> {
+            fireScenarioEvent(
+                    new ScenarioEvent(event.getTestCase(), event.getResult().getStatus()),
+                    AfterScenario.Literal.INSTANCE);
             var scenarioContext = Arc.container().getActiveContext(ScenarioScope.class);
             if (scenarioContext != null) {
                 scenarioContext.destroy();
@@ -134,18 +143,22 @@ public abstract class CucumberQuarkusTest {
                         AtomicReference<TestStepFinished> resultAtomicReference = new AtomicReference<>();
                         EventHandler<TestStepFinished> handler = event -> {
                             if (event.getResult().getStatus() != Status.PASSED) {
-                                // save the first failed test step, so that we can get the line number of the cucumber file
+                                // save the first failed test step, so that we can get the line number of the
+                                // cucumber file
                                 resultAtomicReference.compareAndSet(null, event);
                             }
                         };
 
+                        eventBus.registerHandlerFor(TestCaseStarted.class, scenarioStartedHandler);
                         eventBus.registerHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
                         eventBus.registerHandlerFor(TestStepFinished.class, handler);
                         context.runTestCase(r -> r.runPickle(p));
                         eventBus.removeHandlerFor(TestStepFinished.class, handler);
                         eventBus.removeHandlerFor(TestCaseFinished.class, scenarioFinishedHandler);
+                        eventBus.removeHandlerFor(TestCaseStarted.class, scenarioStartedHandler);
 
-                        // if we have no main arguments, we are running as part of a junit test suite, we need to fail the junit test explicitly
+                        // if we have no main arguments, we are running as part of a junit test suite,
+                        // we need to fail the junit test explicitly
                         if (resultAtomicReference.get() != null) {
                             TestStep testStep = resultAtomicReference.get().getTestStep();
                             if (testStep instanceof PickleStepTestStep) {
@@ -205,6 +218,18 @@ public abstract class CucumberQuarkusTest {
         return new CucumberExecutionContext(eventBus, exitStatus, () -> runner);
     }
 
+    /**
+     * Fires a CDI event for scenario lifecycle hooks.
+     *
+     * @param event the scenario event payload
+     * @param qualifier the qualifier annotation (BeforeScenario or AfterScenario)
+     */
+    private static void fireScenarioEvent(ScenarioEvent event, java.lang.annotation.Annotation qualifier) {
+        Arc.container().beanManager().getEvent()
+                .select(ScenarioEvent.class, qualifier)
+                .fire(event);
+    }
+
     public static class CdiObjectFactory implements ObjectFactory {
         public CdiObjectFactory() {
         }
@@ -256,11 +281,13 @@ public abstract class CucumberQuarkusTest {
         commandlineOptionsParser.exitStatus().ifPresent(System::exit);
 
         System.setProperty(Constants.ANSI_COLORS_DISABLED_PROPERTY_NAME, String.valueOf(runtimeOptions.isMonochrome()));
-        //TODO: CUCUMBER_PROPERTIES_FILE_NAME
+        // TODO: CUCUMBER_PROPERTIES_FILE_NAME
         System.setProperty(Constants.EXECUTION_DRY_RUN_PROPERTY_NAME, String.valueOf(runtimeOptions.isDryRun()));
         System.setProperty(Constants.EXECUTION_LIMIT_PROPERTY_NAME, String.valueOf(runtimeOptions.getLimitCount()));
-        //TODO: EXECUTION_ORDER_PROPERTY_NAME runtimeOptions.getPickleOrder(); (how can we convert this?)
-        //--strict/--no-strict is already handled by the CommandlineOptionsParser EXECUTION_STRICT_PROPERTY_NAME
+        // TODO: EXECUTION_ORDER_PROPERTY_NAME runtimeOptions.getPickleOrder(); (how can
+        // we convert this?)
+        // --strict/--no-strict is already handled by the CommandlineOptionsParser
+        // EXECUTION_STRICT_PROPERTY_NAME
         System.setProperty(Constants.WIP_PROPERTY_NAME, String.valueOf(runtimeOptions.isWip()));
         System.setProperty(Constants.FEATURES_PROPERTY_NAME,
                 runtimeOptions.getFeaturePaths().stream().map(Paths::get).map(Path::toString).collect(Collectors.joining(",")));
@@ -274,11 +301,12 @@ public abstract class CucumberQuarkusTest {
                 .ifPresent(s -> System.setProperty(Constants.OBJECT_FACTORY_PROPERTY_NAME, s.getName()));
         System.setProperty(Constants.PLUGIN_PROPERTY_NAME,
                 runtimeOptions.plugins().stream().map(Options.Plugin::pluginString).collect(Collectors.joining(",")));
-        //Not supported via CLI argument: PLUGIN_PUBLISH_ENABLED_PROPERTY_NAME
-        //Not supported via CLI argument: PLUGIN_PUBLISH_TOKEN_PROPERTY_NAME
-        //Not supported via CLI argument: PLUGIN_PUBLISH_URL_PROPERTY_NAME
-        //Not supported via CLI argument: PLUGIN_PUBLISH_QUIET_PROPERTY_NAME
-        System.setProperty(Constants.SNIPPET_TYPE_PROPERTY_NAME, runtimeOptions.getSnippetType().toString().toLowerCase());
+        // Not supported via CLI argument: PLUGIN_PUBLISH_ENABLED_PROPERTY_NAME
+        // Not supported via CLI argument: PLUGIN_PUBLISH_TOKEN_PROPERTY_NAME
+        // Not supported via CLI argument: PLUGIN_PUBLISH_URL_PROPERTY_NAME
+        // Not supported via CLI argument: PLUGIN_PUBLISH_QUIET_PROPERTY_NAME
+        System.setProperty(Constants.SNIPPET_TYPE_PROPERTY_NAME,
+                runtimeOptions.getSnippetType().toString().toLowerCase());
 
         ConsoleLauncher.main("-c", testClass.getName());
     }
