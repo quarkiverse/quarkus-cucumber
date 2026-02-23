@@ -100,7 +100,10 @@ public abstract class CucumberQuarkusTest {
                 runtimeOptions, parser);
 
         final Plugins plugins = new Plugins(new PluginFactory(), runtimeOptions);
-        plugins.addPlugin(new PrettyFormatter(System.out));
+        if (testClassWithCucumberOptions == null
+                || testClassWithCucumberOptions.getAnnotation(CucumberOptions.class).pretty()) {
+            plugins.addPlugin(new PrettyFormatter(System.out));
+        }
 
         final ExitStatus exitStatus = new ExitStatus(runtimeOptions);
         plugins.addPlugin(exitStatus);
