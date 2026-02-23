@@ -116,6 +116,11 @@ public @interface CucumberOptions {
     SnippetType snippets() default SnippetType.UNDERSCORE;
 
     /**
+     * @return false to disable the default {@code PrettyFormatter} output.
+     */
+    boolean pretty() default true;
+
+    /**
      * Specify a custom ObjectFactory.
      * <p>
      * In case a custom ObjectFactory is needed, the class can be specified
