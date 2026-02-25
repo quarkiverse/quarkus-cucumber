@@ -22,7 +22,7 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <quarkus.version>3.31.1</quarkus.version>
+    <quarkus.version>3.32.1</quarkus.version>
     <cucumber.version>7.34.2</cucumber.version>
   </properties>
   <dependencyManagement>
