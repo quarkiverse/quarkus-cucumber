@@ -306,6 +306,6 @@ public abstract class CucumberQuarkusTest {
         System.setProperty(Constants.SNIPPET_TYPE_PROPERTY_NAME,
                 runtimeOptions.getSnippetType().toString().toLowerCase());
 
-        ConsoleLauncher.main("-c", testClass.getName());
+        ConsoleLauncher.main("execute", "-c", testClass.getName());
     }
 }
