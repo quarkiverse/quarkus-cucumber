@@ -306,6 +306,33 @@ public abstract class CucumberQuarkusTest {
         System.setProperty(Constants.SNIPPET_TYPE_PROPERTY_NAME,
                 runtimeOptions.getSnippetType().toString().toLowerCase());
 
-        ConsoleLauncher.main("-c", testClass.getName());
+        ConsoleLauncher.main(consoleLauncherArgs(testClass.getName()));
+    }
+
+    /**
+     * Builds the {@link ConsoleLauncher} arguments for the given test class, accounting for the
+     * JUnit Platform CLI change: JUnit Platform 6 (shipped with Quarkus 3.31+) requires the explicit
+     * {@code execute} subcommand, whereas JUnit Platform 1.x (JUnit 5) does not accept it. See #298.
+     */
+    static String[] consoleLauncherArgs(String testClassName) {
+        return isJUnitPlatform6OrLater()
+                ? new String[] { "execute", "-c", testClassName }
+                : new String[] { "-c", testClassName };
+    }
+
+    /**
+     * @return {@code true} when the JUnit Platform on the classpath is version 6 or later. Falls back
+     *         to {@code true} (the default since Quarkus 3.31) when the version cannot be determined.
+     */
+    static boolean isJUnitPlatform6OrLater() {
+        String version = ConsoleLauncher.class.getPackage().getImplementationVersion();
+        if (version == null || version.isBlank()) {
+            return true;
+        }
+        try {
+            return Integer.parseInt(version.split("\\.")[0]) >= 6;
+        } catch (NumberFormatException e) {
+            return true;
+        }
     }
 }
