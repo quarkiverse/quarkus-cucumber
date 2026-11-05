@@ -27,6 +27,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.console.ConsoleLauncher;
 
 import io.cucumber.core.backend.ObjectFactory;
+import io.cucumber.core.backend.discovery.UriGlueDiscoverySelector;
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.feature.FeatureParser;
 import io.cucumber.core.filter.Filters;
@@ -342,7 +343,8 @@ public abstract class CucumberQuarkusTest {
         System.setProperty(Constants.FILTER_TAGS_PROPERTY_NAME,
                 runtimeOptions.getTagExpressions().stream().map(Object::toString).collect(Collectors.joining(",")));
         System.setProperty(Constants.GLUE_PROPERTY_NAME,
-                runtimeOptions.getGlue().stream().map(URI::toString).collect(Collectors.joining(",")));
+                runtimeOptions.getGlueDiscoveryRequest().getSelectorsByType(UriGlueDiscoverySelector.class).stream()
+                        .map(UriGlueDiscoverySelector::uri).map(URI::toString).collect(Collectors.joining(",")));
         Optional.ofNullable(runtimeOptions.getObjectFactoryClass())
                 .ifPresent(s -> System.setProperty(Constants.OBJECT_FACTORY_PROPERTY_NAME, s.getName()));
         System.setProperty(Constants.PLUGIN_PROPERTY_NAME,
