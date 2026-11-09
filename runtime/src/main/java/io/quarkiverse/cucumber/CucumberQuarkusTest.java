@@ -100,8 +100,7 @@ public abstract class CucumberQuarkusTest {
                 runtimeOptions, parser);
 
         final Plugins plugins = new Plugins(new PluginFactory(), runtimeOptions);
-        if (testClassWithCucumberOptions == null
-                || testClassWithCucumberOptions.getAnnotation(CucumberOptions.class).pretty()) {
+        if (isPrettyFormatterEnabled(testClassWithCucumberOptions)) {
             plugins.addPlugin(new PrettyFormatter(System.out));
         }
 
@@ -200,6 +199,11 @@ public abstract class CucumberQuarkusTest {
             }
         }
         return null;
+    }
+
+    static boolean isPrettyFormatterEnabled(Class<?> testClassWithCucumberOptions) {
+        return testClassWithCucumberOptions == null
+                || testClassWithCucumberOptions.getAnnotation(CucumberOptions.class).pretty();
     }
 
     private static CucumberExecutionContext cucumberExecutionContext(EventBus eventBus, RuntimeOptions runtimeOptions,
