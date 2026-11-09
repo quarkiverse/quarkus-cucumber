@@ -8,4 +8,4 @@ metadata:
   guide: https://quarkiverse.github.io/quarkiverse-docs/quarkus-cucumber/dev/index.html
 #  categories:
 #    - "miscellaneous"
-  status: "experimental"
+  status: "stable"
