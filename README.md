@@ -1,6 +1,6 @@
 # Quarkus Cucumber
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Version](https://img.shields.io/maven-central/v/io.quarkiverse.cucumber/quarkus-cucumber?logo=apache-maven&style=flat-square)](https://search.maven.org/artifact/io.quarkiverse.cucumber/quarkus-cucumber)
@@ -33,6 +33,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://www.elsolitario.org"><img src="https://avatars.githubusercontent.com/u/3538408?v=4&size=100" width="100px" height="100px" alt="Luis Navarro"/><br /><sub><b>Luis Navarro</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=lu1tr0n" title="Code">💻</a> <a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=lu1tr0n" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://hiramchirino.com"><img src="https://avatars.githubusercontent.com/u/103255?v=4&size=100" width="100px" height="100px" alt="Hiram Chirino"/><br /><sub><b>Hiram Chirino</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=chirino" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
