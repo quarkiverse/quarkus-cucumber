@@ -79,6 +79,15 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "chirino",
+      "name": "Hiram Chirino",
+      "avatar_url": "https://avatars.githubusercontent.com/u/103255?v=4",
+      "profile": "http://hiramchirino.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
