@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicNode;
@@ -62,6 +63,8 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 public abstract class CucumberQuarkusTest {
+
+    private static final Logger LOG = Logger.getLogger(CucumberQuarkusTest.class);
 
     @TestFactory
     List<DynamicNode> getTests() {
@@ -210,23 +213,32 @@ public abstract class CucumberQuarkusTest {
     /**
      * Returns precise position of Feature or Scenario executed
      *
-     * @param uri file uri of feature or scenario retrieved from
+     * @param uri uri of feature or scenario; {@code classpath:} uris are resolved to their location, others are used as is
      * @param location location in a file, specifically the line
      * @return URI compatible with Junit
      */
-    private static URI getTestSourceUri(URI uri, Location location) {
+    static URI getTestSourceUri(URI uri, Location location) {
         return Optional.of(uri)
-                .map(feature -> Thread.currentThread().getContextClassLoader()
-                        .getResource(feature.getSchemeSpecificPart()))
+                .map(CucumberQuarkusTest::resolveClasspathUri)
+                .map(sourceUri -> URI.create(sourceUri + "?line=" + location.getLine()))
+                .orElse(null);
+    }
+
+    private static URI resolveClasspathUri(URI uri) {
+        if (!"classpath".equals(uri.getScheme())) {
+            return uri;
+        }
+        return Optional.ofNullable(Thread.currentThread().getContextClassLoader()
+                .getResource(uri.getSchemeSpecificPart()))
                 .map(url -> {
                     try {
                         return url.toURI();
                     } catch (URISyntaxException e) {
-                        e.printStackTrace();
+                        LOG.debugf(e, "Could not convert resource URL %s of %s to a URI, test source will not be linked",
+                                url, uri);
                         return null;
                     }
                 })
-                .map(fileUri -> URI.create(fileUri + "?line=" + location.getLine()))
                 .orElse(null);
     }
 
