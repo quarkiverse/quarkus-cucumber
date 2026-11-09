@@ -51,6 +51,15 @@
         "code",
         "maintenance"
       ]
+    },
+    {
+      "login": "tkoen93",
+      "name": "Timo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43822286?v=4",
+      "profile": "https://github.com/tkoen93",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
