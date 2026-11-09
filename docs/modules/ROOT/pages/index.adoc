@@ -1,7 +1,7 @@
 = Quarkus Cucumber
 include::./includes/attributes.adoc[]
 
-:extension-status: experimental
+:extension-status: stable
 
 This extension allows you to use https://cucumber.io/[Cucumber] to test your Quarkus application.
 
