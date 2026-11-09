@@ -23,7 +23,7 @@
   </scm>
   <properties>
     <quarkus.version>3.40.1.1</quarkus.version>
-    <cucumber.version>7.34.2</cucumber.version>
+    <cucumber.version>7.34.9</cucumber.version>
   </properties>
   <dependencyManagement>
     <dependencies>
