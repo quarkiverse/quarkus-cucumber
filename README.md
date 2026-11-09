@@ -1,6 +1,6 @@
 # Quarkus Cucumber
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Version](https://img.shields.io/maven-central/v/io.quarkiverse.cucumber/quarkus-cucumber?logo=apache-maven&style=flat-square)](https://search.maven.org/artifact/io.quarkiverse.cucumber/quarkus-cucumber)
@@ -30,6 +30,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nh2297"><img src="https://avatars.githubusercontent.com/u/208935727?v=4&size=100" width="100px" height="100px" alt="Nico Hinrichs"/><br /><sub><b>Nico Hinrichs</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=nh2297" title="Code">💻</a> <a href="#maintenance-nh2297" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tkoen93"><img src="https://avatars.githubusercontent.com/u/43822286?v=4&size=100" width="100px" height="100px" alt="Timo"/><br /><sub><b>Timo</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=tkoen93" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://notmattlucas.com"><img src="https://avatars.githubusercontent.com/u/194847?v=4&size=100" width="100px" height="100px" alt="Matthew Lucas"/><br /><sub><b>Matthew Lucas</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=notmattlucas" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.elsolitario.org"><img src="https://avatars.githubusercontent.com/u/3538408?v=4&size=100" width="100px" height="100px" alt="Luis Navarro"/><br /><sub><b>Luis Navarro</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=lu1tr0n" title="Code">💻</a> <a href="https://github.com/quarkiverse/quarkus-cucumber/commits?author=lu1tr0n" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>
