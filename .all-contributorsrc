@@ -69,6 +69,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "lu1tr0n",
+      "name": "Luis Navarro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3538408?v=4",
+      "profile": "https://www.elsolitario.org",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
