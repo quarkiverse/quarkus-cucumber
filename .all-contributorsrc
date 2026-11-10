@@ -88,6 +88,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "dmi3coder",
+      "name": "Dmytro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12466860?v=4",
+      "profile": "http://buildwithdmytro.com/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
