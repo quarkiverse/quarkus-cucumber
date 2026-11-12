@@ -35,6 +35,20 @@ public class MyTest extends CucumberQuarkusTest {
 
 This will automatically bootstrap Cucumber, and discover any `.feature` files and step classes that provide glue code.
 
+=== Report Plugins
+
+Since Cucumber 8, report plugins that write JSON (e.g. `json`, `html` or `message`) require a JSON library on the classpath.
+Most Quarkus applications already provide Jackson. If yours does not, add `quarkus-jackson` to your test dependencies:
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-jackson</artifactId>
+    <scope>test</scope>
+</dependency>
+----
+
 == ScenarioScope
 
 The `@ScenarioScope` annotation allows you to define beans whose state is tied to the lifecycle of a Cucumber scenario. This means that the state of these beans will automatically reset between the execution of each scenario, without the need for manual cleanup.
